@@ -34,11 +34,11 @@ jobs:
         id: pkg
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          STAGE="wolbox-${VERSION}-x86_64"
+          STAGE="wol-gui-${VERSION}-x86_64"
           mkdir -p "$STAGE"
-          cp wolbox "$STAGE"/
-          cp data/wolbox.desktop "$STAGE"/
-          cp data/wolbox.svg "$STAGE"/
+          cp wol-gui "$STAGE"/
+          cp data/wol-gui.desktop "$STAGE"/
+          cp data/wol-gui.svg "$STAGE"/
           cp LICENSE README.md "$STAGE"/
           tar czf "${STAGE}.tar.gz" "$STAGE"
           sha256sum "${STAGE}.tar.gz" > "${STAGE}.tar.gz.sha256"

@@ -1,4 +1,4 @@
-# CI: build wolbox inside the official Arch Linux container.
+# CI: build wol-gui inside the official Arch Linux container.
 name: ci
 
 on:
@@ -30,17 +30,17 @@ jobs:
 
       - name: Smoke check (binary exists and links only against expected libs)
         run: |
-          test -x ./wolbox
-          file ./wolbox
-          ldd ./wolbox | grep -E 'libgtk-3|libc\.so'
+          test -x ./wol-gui
+          file ./wol-gui
+          ldd ./wol-gui | grep -E 'libgtk-3|libc\.so'
           # namcap is a nice-to-have; do not fail CI if unavailable.
           if command -v namcap >/dev/null 2>&1; then
-            namcap ./wolbox || true
+            namcap ./wol-gui || true
           fi
 
       - name: Stage install check (DESTDIR/PREFIX support)
         run: |
           make DESTDIR="$PWD/pkgtest" PREFIX=/usr install
-          test -x pkgtest/usr/bin/wolbox
-          test -f pkgtest/usr/share/applications/wolbox.desktop
-          test -f pkgtest/usr/share/icons/hicolor/scalable/apps/wolbox.svg
+          test -x pkgtest/usr/bin/wol-gui
+          test -f pkgtest/usr/share/applications/wol-gui.desktop
+          test -f pkgtest/usr/share/icons/hicolor/scalable/apps/wol-gui.svg

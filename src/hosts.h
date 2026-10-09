@@ -1,8 +1,8 @@
-/* wolbox - host list model + GKeyFile persistence
+/* wol-gui - host list model + GKeyFile persistence
  * SPDX-License-Identifier: MIT
  */
-#ifndef WOLBOX_HOSTS_H
-#define WOLBOX_HOSTS_H
+#ifndef WOLGUI_HOSTS_H
+#define WOLGUI_HOSTS_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -37,7 +37,7 @@ bool host_list_replace(HostList *list, size_t i, const Host *h);
 bool host_copy(Host *dst, const Host *src);
 void host_clear(Host *h);
 
-/* Load from $XDG_CONFIG_HOME/wolbox/hosts.ini (fallback ~/.config/wolbox/).
+/* Load from $XDG_CONFIG_HOME/wol-gui/hosts.ini (fallback ~/.config/wol-gui/).
  * Missing or corrupt files are handled gracefully: the list stays empty and
  * a warning message (if any) is returned through *warning (caller g_frees). */
 bool hosts_load(HostList *list, char **warning);
@@ -49,4 +49,4 @@ bool hosts_save(const HostList *list, char **err);
 /* Full path of the config file (newly allocated string). */
 char *hosts_config_path(void);
 
-#endif /* WOLBOX_HOSTS_H */
+#endif /* WOLGUI_HOSTS_H */

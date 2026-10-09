@@ -1,8 +1,8 @@
-/* wolbox - GTK3 user interface
+/* wol-gui - GTK3 user interface
  * SPDX-License-Identifier: MIT
  */
-#ifndef WOLBOX_UI_H
-#define WOLBOX_UI_H
+#ifndef WOLGUI_UI_H
+#define WOLGUI_UI_H
 
 #include <gtk/gtk.h>
 
@@ -19,4 +19,4 @@ typedef struct {
 /* Build the main window and all widgets. Returns false if setup failed. */
 gboolean ui_startup(gpointer user_data);
 
-#endif /* WOLBOX_UI_H */
+#endif /* WOLGUI_UI_H */

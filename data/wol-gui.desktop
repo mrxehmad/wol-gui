@@ -1,11 +1,10 @@
 [Desktop Entry]
 Type=Application
-Version=1.0
-Name=wolbox
+Name=wol-gui
 GenericName=Wake-on-LAN client
 Comment=Send Wake-on-LAN magic packets to hosts on your network
-Exec=wolbox
-Icon=wolbox
+Exec=wol-gui
+Icon=wol-gui
 Terminal=false
 Categories=Network;RemoteAccess;GTK;
 Keywords=wake;wol;magic packet;power;remote boot;

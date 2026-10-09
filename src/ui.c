@@ -1,9 +1,11 @@
-/* wolbox - GTK3 user interface
+/* wol-gui - GTK3 user interface
  * SPDX-License-Identifier: MIT
  */
 #include "ui.h"
+#include "version.h"
 #include "wol.h"
 
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -26,7 +28,7 @@ static void status_msg(App *app, const char *fmt, ...)
     vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
 
-    guint id = gtk_statusbar_get_context_id(app->status, "wolbox");
+    guint id = gtk_statusbar_get_context_id(app->status, "wol-gui");
     gtk_statusbar_pop(app->status, id);
     gtk_statusbar_push(app->status, id, buf);
 }
@@ -39,9 +41,32 @@ static void error_dialog(App *app, const char *msg)
                                           GTK_MESSAGE_ERROR,
                                           GTK_BUTTONS_OK,
                                           "%s", msg ? msg : "Unknown error");
-    gtk_window_set_title(GTK_WINDOW(d), "wolbox");
+    gtk_window_set_title(GTK_WINDOW(d), APP_NAME);
     gtk_dialog_run(GTK_DIALOG(d));
     gtk_widget_destroy(d);
+}
+
+/* About dialog: version, config location, license + attribution. */
+static void on_about_clicked(GtkButton *button, gpointer user_data)
+{
+    (void)button;
+    App *app = user_data;
+
+    char *cfg = hosts_config_path();
+    GtkWidget *d = gtk_message_dialog_new(
+        GTK_WINDOW(app->window), GTK_DIALOG_MODAL |
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_MESSAGE_OTHER, GTK_BUTTONS_CLOSE,
+        "%s %s\nSimple Wake-on-LAN client (GTK3)\n\n"
+        "Config file: %s\n\n"
+        "Inspired by gwakeonlan (https://github.com/benbotello/gwakeonlan).\n"
+        "Icon: \"totalcmd-lan-windows-shares\" via svgrepo.com.\n"
+        "Licensed under the MIT License.",
+        APP_NAME, APP_VERSION, cfg);
+    gtk_window_set_title(GTK_WINDOW(d), "About " APP_NAME);
+    gtk_dialog_run(GTK_DIALOG(d));
+    gtk_widget_destroy(d);
+    g_free(cfg);
 }
 
 /* Persist the model; report failures in the status bar. */
@@ -373,9 +398,9 @@ gboolean ui_startup(gpointer user_data)
     hosts_load(&app->hosts, &warning);
 
     app->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(app->window), "wolbox");
+    gtk_window_set_title(GTK_WINDOW(app->window), "wol-gui");
     gtk_window_set_default_size(GTK_WINDOW(app->window), 720, 420);
-    gtk_window_set_icon_name(GTK_WINDOW(app->window), "wolbox");
+    gtk_window_set_icon_name(GTK_WINDOW(app->window), "wol-gui");
     g_signal_connect(app->window, "destroy", G_CALLBACK(on_destroy), app);
 
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
@@ -421,6 +446,12 @@ gboolean ui_startup(gpointer user_data)
                          G_CALLBACK(on_wake_clicked), app), TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hb), make_button("Wake All",
                          G_CALLBACK(on_wake_all_clicked), app), TRUE, TRUE, 0);
+
+    GtkWidget *about = make_button("About",
+                                   G_CALLBACK(on_about_clicked), app);
+    gtk_widget_set_halign(about, GTK_ALIGN_END);
+    gtk_box_pack_end(GTK_BOX(hb), about, FALSE, FALSE, 0);
+
     gtk_box_pack_start(GTK_BOX(vbox), hb, FALSE, FALSE, 0);
 
     /* Status bar. */

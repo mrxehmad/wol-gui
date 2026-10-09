@@ -1,1 +1,4 @@
-(empty)
+# Build artifacts
+*.o
+*.d
+wolbox

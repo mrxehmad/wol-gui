@@ -1,4 +1,4 @@
-# wolbox - simple Wake-on-LAN GUI (GTK3)
+# wol-gui - simple Wake-on-LAN GUI (GTK3)
 # SPDX-License-Identifier: MIT
 
 PREFIX ?= /usr
@@ -17,7 +17,8 @@ CFLAGS   += -std=c11 -O2 -Wall -Wextra $(PKG_CFLAGS)
 LDFLAGS  +=
 LIBS     += $(PKG_LIBS)
 
-BIN      = wolbox
+BIN      = wol-gui
+VERSION  = 0.1.0
 SRCS     = src/main.c src/ui.c src/hosts.c src/wol.c
 OBJS     = $(SRCS:.c=.o)
 DEPS     = $(OBJS:.o=.d)
@@ -29,20 +30,23 @@ all: $(BIN)
 $(BIN): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-src/%.o: src/%.c
+src/version.h: src/version.h.in
+	sed 's/@VERSION@/$(VERSION)/' $< > $@.tmp && mv -f $@.tmp $@
+
+src/%.o: src/%.c src/version.h
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
 
 -include $(DEPS)
 
 clean:
-	rm -f $(BIN) $(OBJS) $(DEPS)
+	rm -f $(BIN) $(OBJS) $(DEPS) src/version.h
 
 install: $(BIN)
 	install -Dm755 $(BIN) $(BINDIR)/$(BIN)
-	install -Dm644 data/wolbox.desktop $(APPSDIR)/wolbox.desktop
-	install -Dm644 data/wolbox.svg $(ICONSDIR)/wolbox.svg
+	install -Dm644 data/wol-gui.desktop $(APPSDIR)/wol-gui.desktop
+	install -Dm644 data/wol-gui.svg $(ICONSDIR)/wol-gui.svg
 
 uninstall:
 	rm -f $(BINDIR)/$(BIN)
-	rm -f $(APPSDIR)/wolbox.desktop
-	rm -f $(ICONSDIR)/wolbox.svg
+	rm -f $(APPSDIR)/wol-gui.desktop
+	rm -f $(ICONSDIR)/wol-gui.svg
