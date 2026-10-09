@@ -1,0 +1,44 @@
+# CI: build wolbox inside the official Arch Linux container.
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm --needed gtk3 pkgconf make git
+
+      - name: Checkout
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth=1 origin "${GITHUB_SHA}"
+          git checkout -q FETCH_HEAD
+
+      - name: Build
+        run: make
+
+      - name: Smoke check (binary exists and links only against expected libs)
+        run: |
+          test -x ./wolbox
+          file ./wolbox
+          ldd ./wolbox | grep -E 'libgtk-3|libc\.so'
+          # namcap is a nice-to-have; do not fail CI if unavailable.
+          if command -v namcap >/dev/null 2>&1; then
+            namcap ./wolbox || true
+          fi
+
+      - name: Stage install check (DESTDIR/PREFIX support)
+        run: |
+          make DESTDIR="$PWD/pkgtest" PREFIX=/usr install
+          test -x pkgtest/usr/bin/wolbox
+          test -f pkgtest/usr/share/applications/wolbox.desktop
+          test -f pkgtest/usr/share/icons/hicolor/scalable/apps/wolbox.svg

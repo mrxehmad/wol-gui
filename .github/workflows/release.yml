@@ -1,0 +1,83 @@
+# Release: build a binary tarball on tag push, publish a GitHub Release,
+# and (optionally) bump the AUR package.
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    permissions:
+      contents: write
+    steps:
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm --needed gtk3 pkgconf make git coreutils
+
+      - name: Checkout tag
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth=1 origin "${GITHUB_REF_NAME}"
+          git checkout -q FETCH_HEAD
+
+      - name: Build
+        run: make
+
+      - name: Package binary tarball
+        id: pkg
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          STAGE="wolbox-${VERSION}-x86_64"
+          mkdir -p "$STAGE"
+          cp wolbox "$STAGE"/
+          cp data/wolbox.desktop "$STAGE"/
+          cp data/wolbox.svg "$STAGE"/
+          cp LICENSE README.md "$STAGE"/
+          tar czf "${STAGE}.tar.gz" "$STAGE"
+          sha256sum "${STAGE}.tar.gz" > "${STAGE}.tar.gz.sha256"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "asset=${STAGE}.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "sumfile=${STAGE}.tar.gz.sha256" >> "$GITHUB_OUTPUT"
+          ls -l "${STAGE}.tar.gz"*
+
+      - name: Create GitHub Release with assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            ${{ steps.pkg.outputs.asset }}
+            ${{ steps.pkg.outputs.sumfile }}
+
+  # Optional: automatically push the updated PKGBUILD to the AUR.
+  # Skipped unless the AUR_SSH_PRIVATE_KEY repository secret is configured.
+  aur-publish:
+    needs: release
+    runs-on: ubuntu-latest
+    if: ${{ secrets.AUR_SSH_PRIVATE_KEY != '' }}
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+
+      - name: Bump pkgver from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i "s/^pkgver=.*/pkgver=${VERSION}/" packaging/aur/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" packaging/aur/PKGBUILD
+
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v3.0.2
+        with:
+          pkgname: wol-gui
+          pkgbuild: ./packaging/aur/PKGBUILD
+          commit_username: github-actions[bot]
+          commit_email: github-actions[bot]@users.noreply.github.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Release ${{ github.ref_name }}"
+          updpkgsums: true
+          makepkg_srcinfo: true
