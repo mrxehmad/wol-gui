@@ -11,17 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: archlinux:base-devel
+      # The minimal Arch image has no bash/sh utilities GitHub needs for its
+      # step wrappers; run as root and let the pre-step below install them.
+      options: --user root -e LC_ALL=C.UTF-8
     steps:
-      - name: Install dependencies
-        run: |
-          pacman -Syu --noconfirm --needed gtk3 pkgconf make git
+      - name: Install checkout prerequisites
+        # make/gcc ship with base-devel; these are needed by actions/checkout.
+        run: pacman -Sy --noconfirm --needed git sed grep tar findutils
 
       - name: Checkout
-        run: |
-          git init -q .
-          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
-          git fetch -q --depth=1 origin "${GITHUB_SHA}"
-          git checkout -q FETCH_HEAD
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm --needed gtk3 pkgconf
 
       - name: Build
         run: make

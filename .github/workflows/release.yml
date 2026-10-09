@@ -1,5 +1,7 @@
-# Release: build a binary tarball on tag push, publish a GitHub Release,
-# and (optionally) bump the AUR package.
+# Release: build a binary tarball on tag push and publish a GitHub Release.
+# NOTE: The optional aur-publish job is intentionally commented out because
+# AUR registration is currently closed. Uncomment it (and set the
+# AUR_SSH_PRIVATE_KEY repository secret) once you can submit the package.
 name: release
 
 on:
@@ -12,18 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: archlinux:base-devel
+      # The minimal Arch image has no bash/sh utilities GitHub needs for its
+      # step wrappers; run as root and let the first step install them.
+      options: --user root -e LC_ALL=C.UTF-8
     permissions:
       contents: write
     steps:
       - name: Install dependencies
-        run: pacman -Syu --noconfirm --needed gtk3 pkgconf make git coreutils
+        # make/gcc ship with base-devel; the rest are used by checkout/build/packaging.
+        run: pacman -Sy --noconfirm --needed git sed grep tar findutils coreutils gtk3 pkgconf
 
       - name: Checkout tag
-        run: |
-          git init -q .
-          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
-          git fetch -q --depth=1 origin "${GITHUB_REF_NAME}"
-          git checkout -q FETCH_HEAD
+        uses: actions/checkout@v4
 
       - name: Build
         run: make
@@ -54,30 +56,50 @@ jobs:
             ${{ steps.pkg.outputs.asset }}
             ${{ steps.pkg.outputs.sumfile }}
 
+  # ---------------------------------------------------------------------
   # Optional: automatically push the updated PKGBUILD to the AUR.
-  # Skipped unless the AUR_SSH_PRIVATE_KEY repository secret is configured.
-  aur-publish:
-    needs: release
-    runs-on: ubuntu-latest
-    if: ${{ secrets.AUR_SSH_PRIVATE_KEY != '' }}
-    steps:
-      - name: Checkout tag
-        uses: actions/checkout@v4
-
-      - name: Bump pkgver from tag
-        run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          sed -i "s/^pkgver=.*/pkgver=${VERSION}/" packaging/aur/PKGBUILD
-          sed -i "s/^pkgrel=.*/pkgrel=1/" packaging/aur/PKGBUILD
-
-      - name: Publish to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v3.0.2
-        with:
-          pkgname: wol-gui
-          pkgbuild: ./packaging/aur/PKGBUILD
-          commit_username: github-actions[bot]
-          commit_email: github-actions[bot]@users.noreply.github.com
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: "Release ${{ github.ref_name }}"
-          updpkgsums: true
-          makepkg_srcinfo: true
+  # Disabled for now (AUR account/package registration is closed).
+  # To enable: uncomment this whole job AND add the repository secret
+  # AUR_SSH_PRIVATE_KEY (an SSH private key whose public half is added to
+  # your AUR account). The `if:` below skips the job when the secret is
+  # missing; note that `secrets.*` cannot be referenced at job level, so
+  # the check is done in a prep step via `vars`-style output instead.
+  # ---------------------------------------------------------------------
+  # aur-publish:
+  #   needs: release
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check AUR secret availability
+  #       id: check
+  #       env:
+  #         AUR_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+  #       run: |
+  #         if [ -n "$AUR_KEY" ]; then
+  #           echo "enabled=true" >> "$GITHUB_OUTPUT"
+  #         else
+  #           echo "enabled=false" >> "$GITHUB_OUTPUT"
+  #         fi
+  #
+  #     - name: Checkout tag
+  #       if: steps.check.outputs.enabled == 'true'
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Bump pkgver from tag
+  #       if: steps.check.outputs.enabled == 'true'
+  #       run: |
+  #         VERSION="${GITHUB_REF_NAME#v}"
+  #         sed -i "s/^pkgver=.*/pkgver=${VERSION}/" packaging/aur/PKGBUILD
+  #         sed -i "s/^pkgrel=.*/pkgrel=1/" packaging/aur/PKGBUILD
+  #
+  #     - name: Publish to AUR
+  #       if: steps.check.outputs.enabled == 'true'
+  #       uses: KSXGitHub/github-actions-deploy-aur@v3.0.2
+  #       with:
+  #         pkgname: wol-gui
+  #         pkgbuild: ./packaging/aur/PKGBUILD
+  #         commit_username: github-actions[bot]
+  #         commit_email: github-actions[bot]@users.noreply.github.com
+  #         ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+  #         commit_message: "Release ${{ github.ref_name }}"
+  #         updpkgsums: true
+  #         makepkg_srcinfo: true
