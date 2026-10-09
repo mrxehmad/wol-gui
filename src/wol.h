@@ -1,8 +1,8 @@
-/* wolbox - Wake-on-LAN magic packet sender
+/* wol-gui - Wake-on-LAN magic packet sender
  * SPDX-License-Identifier: MIT
  */
-#ifndef WOLBOX_WOL_H
-#define WOLBOX_WOL_H
+#ifndef WOLGUI_WOL_H
+#define WOLGUI_WOL_H
 
 #include <ctype.h>
 #include <stdbool.h>
@@ -29,4 +29,4 @@ size_t wol_build_magic_packet(const uint8_t mac[WOL_MAC_LEN],
 bool wol_send_packet(const char *broadcast_ip, uint16_t port,
                      const uint8_t mac[WOL_MAC_LEN], const char **err);
 
-#endif /* WOLBOX_WOL_H */
+#endif /* WOLGUI_WOL_H */

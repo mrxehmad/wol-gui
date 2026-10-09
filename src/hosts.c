@@ -1,9 +1,10 @@
-/* wolbox - host list model + GKeyFile persistence
+/* wol-gui - host list model + GKeyFile persistence
  * SPDX-License-Identifier: MIT
  */
 #define _POSIX_C_SOURCE 200809L
 
 #include "hosts.h"
+#include "version.h"
 #include "wol.h"
 
 #include <errno.h>
@@ -92,9 +93,12 @@ bool host_list_replace(HostList *list, size_t i, const Host *h)
     return true;
 }
 
+/* Config lives under $XDG_CONFIG_HOME (default: ~/.config), i.e.
+ * ~/.config/wol-gui/hosts.ini unless the user overrides XDG_CONFIG_HOME
+ * (e.g. XDG_CONFIG_HOME=~/.local/config). */
 char *hosts_config_path(void)
 {
-    return g_build_filename(g_get_user_config_dir(), "wolbox", "hosts.ini",
+    return g_build_filename(g_get_user_config_dir(), APP_NAME, "hosts.ini",
                             NULL);
 }
 
@@ -160,7 +164,7 @@ bool hosts_save(const HostList *list, char **err)
     if (err)
         *err = NULL;
 
-    char *dir = g_build_filename(g_get_user_config_dir(), "wolbox", NULL);
+    char *dir = g_build_filename(g_get_user_config_dir(), APP_NAME, NULL);
     char *path = hosts_config_path();
     char *tmp = g_strconcat(path, ".tmp", NULL);
     GKeyFile *kf = g_key_file_new();

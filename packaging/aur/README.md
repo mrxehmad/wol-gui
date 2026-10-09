@@ -1,17 +1,16 @@
-# wol-gui (AUR) — skeleton package
+# wol-gui — AUR package (skeleton)
 
-This directory contains a **template** PKGBUILD for publishing wolbox to the
-AUR. It is intentionally not set up yet — fill in the placeholders before use.
+This directory contains the **template** PKGBUILD for publishing `wol-gui`
+to the AUR. It is intentionally not set up yet (AUR submission was closed at
+the time of writing) — finish the steps below when you are ready.
 
 ## Before first submission
 
-1. Replace `USER` in `PKGBUILD` (`url` and `source`) with your GitHub
-   username.
-2. Decide on the AUR package name. This skeleton uses `wol-gui`
-   (`pkgname=wol-gui`); if you prefer `wolbox`, change `pkgname` and the git
-   URL below accordingly.
-3. Add your SSH public key to your AUR account at
-   <https://aur.archlinux.org/account/> (the same account as the Arch wiki).
+1. Set the real `# Maintainer:` name/email at the top of `PKGBUILD`.
+2. The URLs already point to <https://github.com/mrxehmad/wol-gui>; adjust if
+   the repo moves.
+3. Add your SSH public key to your AUR account:
+   <https://aur.archlinux.org/account/> (same account as the Arch wiki).
 
 ## Submitting / updating
 
@@ -25,7 +24,7 @@ cd wol-gui
 
 # Whenever you push a new upstream tag vX.Y.Z:
 #   1. bump pkgver= in PKGBUILD to match the tag
-#   2. refresh the metadata + checksum:
+#   2. refresh metadata + checksum:
 makepkg --printsrcinfo > .SRCINFO   # regenerates .SRCINFO
 updpkgsums                           # rewrites sha256sums from the real tarball
 
@@ -36,10 +35,17 @@ git push
 
 Notes:
 
-- `.SRCINFO` in this repo is generated once from the skeleton; always
-  regenerate it with `makepkg --printsrcinfo > .SRCINFO` before pushing.
-- The CI `aur-publish` job in `.github/workflows/release.yml` can do this
-  automatically via KSXGitHub/github-actions-deploy-aur once you configure the
-  `AUR_SSH_PRIVATE_KEY` repository secret (the job is skipped while the secret
-  is absent).
+- `.SRCINFO` here is generated from the skeleton; always regenerate it with
+  `makepkg --printsrcinfo > .SRCINFO` before pushing.
+- The optional `aur-publish` job in `.github/workflows/release.yml` can do
+  this automatically via KSXGitHub/github-actions-deploy-aur once you add the
+  `AUR_SSH_PRIVATE_KEY` repository secret (the job is commented out for now).
 - Test locally before pushing: `makepkg -si` inside this directory.
+
+## Users: install from the AUR without an AUR helper
+
+```sh
+sudo pacman -S --needed base-devel git
+git clone https://aur.archlinux.org/wol-gui.git
+cd wol-gui && makepkg -si
+```

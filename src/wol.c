@@ -1,4 +1,4 @@
-/* wolbox - Wake-on-LAN magic packet sender
+/* wol-gui - Wake-on-LAN magic packet sender
  * SPDX-License-Identifier: MIT
  */
 #define _POSIX_C_SOURCE 200809L

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- wol-gui application icon (placeholder).
+
+     Intended final icon: "totalcmd-lan-windows-shares" from svgrepo.com:
+       page:     https://www.svgrepo.com/svg/519808/totalcmd-lan-windows-shares
+       download: https://www.svgrepo.com/download/519808/totalcmd-lan-windows-shares.svg
+
+     svgrepo.com blocks automated downloads (bot protection), so this file is a
+     lightweight LAN+wake placeholder for now. To use the chosen icon, download
+     the SVG above in a browser and simply replace this file (keep the name
+     wol-gui.svg; no other changes needed - the Makefile, .desktop file and
+     packaging all reference it by name). -->
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2e7d32"/>
+      <stop offset="1" stop-color="#14501c"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="url(#bg)" stroke="#0b2e10" stroke-width="3"/>
+  <!-- network nodes -->
+  <g stroke="#c8f7c5" stroke-width="5" fill="#eafbe7">
+    <line x1="64" y1="42" x2="34" y2="88"/>
+    <line x1="64" y1="42" x2="94" y2="88"/>
+    <line x1="34" y1="88" x2="94" y2="88"/>
+    <circle cx="64" cy="42" r="11"/>
+    <circle cx="34" cy="88" r="11"/>
+    <circle cx="94" cy="88" r="11"/>
+  </g>
+  <!-- power/wake symbol on the top node -->
+  <path d="M64 34 v10" stroke="#14501c" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M58.5 38.5 a7 7 0 1 0 11 0" stroke="#14501c" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>
