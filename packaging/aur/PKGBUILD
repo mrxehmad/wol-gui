@@ -1,0 +1,29 @@
+# Maintainer: wolbox contributors <you@example.com>
+# Contributor: (add yourself when you adopt this package)
+pkgname=wol-gui
+_pkgbase=wolbox
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Simple GTK3 Wake-on-LAN GUI for Linux'
+arch=('x86_64')
+url='https://github.com/USER/wolbox'
+license=('MIT')
+depends=('gtk3')
+makedepends=('gcc' 'make' 'pkgconf')
+source=("https://github.com/USER/${_pkgbase}/archive/refs/tags/v${pkgver}.tar.gz")
+# IMPORTANT: update this hash after publishing the tag, e.g. run
+#   updpkgsums          (in this directory), or
+#   makepkg --verifysource -fam
+# until then keep it as SKIP for local testing only.
+sha256sums=('SKIP')
+
+build() {
+  cd "${srcdir}/${_pkgbase}-${pkgver}"
+  make
+}
+
+package() {
+  cd "${srcdir}/${_pkgbase}-${pkgver}"
+  make DESTDIR="${pkgdir}" PREFIX=/usr install
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
